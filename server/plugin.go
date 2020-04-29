@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	"regexp"
+	"strings"
 	"sync"
+	"time"
 
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/plugin"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -20,9 +23,47 @@ type Plugin struct {
 	configuration *configuration
 }
 
-// ServeHTTP demonstrates a plugin that handles HTTP requests by greeting the world.
-func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, world!")
+func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*model.Post, string) {
+	p.API.LogWarn("XXXX")
+	siteURL := p.API.GetConfig().ServiceSettings.SiteURL
+	channel, err := p.API.GetChannel(post.ChannelId)
+	if err != nil {
+		return post, err.Message
+	}
+	team, err := p.API.GetTeam(channel.TeamId)
+	if err != nil {
+		return post, err.Message
+	}
+
+	selfLink := fmt.Sprintf("https://%s/%s", *siteURL, team.Name)
+	selfLinkPattern, er := regexp.Compile(fmt.Sprintf("%s%s", selfLink, `/[\w/]+`))
+	if er != nil {
+		return post, er.Error()
+	}
+
+	for _, match := range selfLinkPattern.FindAllString(post.Message, -1) {
+		separated := strings.Split(match, "/")
+		postId := separated[len(separated)-1]
+		oldPost, err := p.API.GetPost(postId)
+		if err != nil {
+			return post, err.Message
+		}
+
+		postUser, err := p.API.GetUser(oldPost.UserId)
+		if err != nil {
+			return post, err.Message
+		}
+
+		quote := fmt.Sprintf("**%s** at **%s** said:\n", postUser.Nickname, time.Unix(oldPost.CreateAt, 0))
+		messageLines := strings.Split(oldPost.Message, "\n")
+		for _, line := range messageLines {
+			quote = fmt.Sprintf("%s\n> %s", quote, line)
+		}
+		post.Message = strings.Replace(post.Message, match, quote, 1)
+	}
+
+	return post, ""
+
 }
 
 // See https://developers.mattermost.com/extend/plugins/server/reference/

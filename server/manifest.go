@@ -12,16 +12,14 @@ var manifest *model.Manifest
 
 const manifestStr = `
 {
-  "id": "com.mattermost.plugin-starter-template",
-  "name": "Plugin Starter Template",
-  "description": "This plugin serves as a starting point for writing a Mattermost plugin.",
+  "id": "business.silly.quote",
+  "name": "Quote (like Rocket Chat) Plugin",
+  "description": "This plugin turns links to scrollback into pretty quotes",
   "version": "0.1.0",
-  "min_server_version": "5.12.0",
+  "min_server_version": "5.18.0",
   "server": {
     "executables": {
-      "linux-amd64": "server/dist/plugin-linux-amd64",
-      "darwin-amd64": "server/dist/plugin-darwin-amd64",
-      "windows-amd64": "server/dist/plugin-windows-amd64.exe"
+      "linux-amd64": "server/dist/plugin-linux-amd64"
     },
     "executable": ""
   },
