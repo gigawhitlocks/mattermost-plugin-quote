@@ -35,7 +35,7 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		return post, err.Message
 	}
 
-	selfLink := fmt.Sprintf("https://%s/%s", *siteURL, team.Name)
+	selfLink := fmt.Sprintf("%s/%s", *siteURL, team.Name)
 	selfLinkPattern, er := regexp.Compile(fmt.Sprintf("%s%s", selfLink, `/[\w/]+`))
 	if er != nil {
 		return post, er.Error()
