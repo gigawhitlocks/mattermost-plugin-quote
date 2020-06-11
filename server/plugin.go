@@ -24,15 +24,14 @@ type Plugin struct {
 }
 
 func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*model.Post, string) {
-	p.API.LogWarn("XXXX")
 	siteURL := p.API.GetConfig().ServiceSettings.SiteURL
-	channel, err := p.API.GetChannel(post.ChannelId)
-	if err != nil {
-		return post, err.Message
+	channel, apiErr := p.API.GetChannel(post.ChannelId)
+	if apiErr != nil {
+		return post, apiErr.Message
 	}
-	team, err := p.API.GetTeam(channel.TeamId)
-	if err != nil {
-		return post, err.Message
+	team, apiErr := p.API.GetTeam(channel.TeamId)
+	if apiErr != nil {
+		return post, apiErr.Message
 	}
 
 	selfLink := fmt.Sprintf("https://%s/%s", *siteURL, team.Name)
@@ -42,28 +41,40 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 	}
 
 	for _, match := range selfLinkPattern.FindAllString(post.Message, -1) {
+		markdownLink, err := regexp.Compile(fmt.Sprintf("\\]\\(%s\\)", match))
+		if err != nil {
+			continue
+		}
+		if markdownLink.FindStringIndex(post.Message) != nil {
+			continue
+		}
+
 		separated := strings.Split(match, "/")
 		postId := separated[len(separated)-1]
-		oldPost, err := p.API.GetPost(postId)
-		if err != nil {
-			return post, err.Message
+		oldPost, apiErr := p.API.GetPost(postId)
+		if apiErr != nil {
+			return post, apiErr.Message
 		}
 
-		postUser, err := p.API.GetUser(oldPost.UserId)
-		if err != nil {
-			return post, err.Message
+		postUser, apiErr := p.API.GetUser(oldPost.UserId)
+		if apiErr != nil {
+			return post, apiErr.Message
 		}
 
-		quote := fmt.Sprintf("**%s** at **%s** said:\n", postUser.Nickname, time.Unix(oldPost.CreateAt, 0))
+		quote := fmt.Sprintf(
+			"**@%s** at **%s** in **~%s** said:\n",
+			postUser.Nickname,
+			time.Unix(oldPost.CreateAt, 0),
+			channel.DisplayName,
+		)
 		messageLines := strings.Split(oldPost.Message, "\n")
 		for _, line := range messageLines {
-			quote = fmt.Sprintf("%s\n> %s", quote, line)
+			quote = fmt.Sprintf("%s\n> %s\n", quote, line)
 		}
 		post.Message = strings.Replace(post.Message, match, quote, 1)
 	}
 
 	return post, ""
-
 }
 
 // See https://developers.mattermost.com/extend/plugins/server/reference/
