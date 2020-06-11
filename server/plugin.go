@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mattermost/mattermost-server/model"
-	"github.com/mattermost/mattermost-server/plugin"
+	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v5/plugin"
 )
 
 // Plugin implements the interface expected by the Mattermost server to communicate between the server and plugin processes.
@@ -34,7 +34,7 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		return post, apiErr.Message
 	}
 
-	selfLink := fmt.Sprintf("https://%s/%s", *siteURL, team.Name)
+	selfLink := fmt.Sprintf("%s/%s", *siteURL, team.Name)
 	selfLinkPattern, er := regexp.Compile(fmt.Sprintf("%s%s", selfLink, `/[\w/]+`))
 	if er != nil {
 		return post, er.Error()
