@@ -45,6 +45,8 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		if err != nil {
 			continue
 		}
+
+		// skip permalinks inside markdown links
 		if markdownLink.FindStringIndex(post.Message) != nil {
 			continue
 		}
@@ -61,12 +63,14 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 			return post, apiErr.Message
 		}
 
-		quote := fmt.Sprintf(
-			"**@%s** at **%s** in **~%s** said:\n",
-			postUser.Nickname,
-			time.Unix(oldPost.CreateAt, 0),
+		postedAt := time.Unix(oldPost.CreateAt/1000, 0)
+		quote := fmt.Sprintf("[**%s** at **%s**](%s) in ~%s said:\n",
+			postUser.Username,
+			postedAt.Format("Mon Jan 2 15:04:05 -0700 MST 2006"),
+			match,
 			channel.DisplayName,
 		)
+
 		messageLines := strings.Split(oldPost.Message, "\n")
 		for _, line := range messageLines {
 			quote = fmt.Sprintf("%s\n> %s\n", quote, line)
@@ -76,5 +80,3 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 
 	return post, ""
 }
-
-// See https://developers.mattermost.com/extend/plugins/server/reference/
