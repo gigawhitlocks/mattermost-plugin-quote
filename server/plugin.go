@@ -68,7 +68,7 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 			postUser.Username,
 			postedAt.Format("Mon Jan 2 08:04PM -0700 MST 2006"),
 			match,
-			channel.DisplayName,
+			channel.Name,
 		)
 
 		messageLines := strings.Split(oldPost.Message, "\n")

@@ -3,9 +3,9 @@
 const manifest = JSON.parse(`
 {
     "id": "business.silly.quote",
-    "name": "Quote (like Rocket Chat) Plugin",
+    "name": "Permalink Quote Expander",
     "description": "This plugin turns links to scrollback into pretty quotes",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "min_server_version": "5.18.0",
     "server": {
         "executables": {
