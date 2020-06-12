@@ -30,7 +30,11 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		return post, apiErr.Message
 	}
 
-	if channel.Type != model.CHANNEL_OPEN {
+	// only allow quoting in open channels and private channels
+	switch channel.Type {
+	case model.CHANNEL_DIRECT:
+		fallthrough
+	case model.CHANNEL_GROUP:
 		return post, ""
 	}
 
@@ -63,6 +67,16 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 			return post, apiErr.Message
 		}
 
+		oldPostChannel, apiErr := p.API.GetChannel(oldPost.ChannelId)
+		if apiErr != nil {
+			return post, apiErr.Message
+		}
+
+		if oldPostChannel.Type != model.CHANNEL_OPEN {
+			// only quote from public channels
+			return post, ""
+		}
+
 		postUser, apiErr := p.API.GetUser(oldPost.UserId)
 		if apiErr != nil {
 			return post, apiErr.Message
@@ -73,13 +87,14 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 			postUser.Username,
 			postedAt.Format("Mon Jan 2 08:04PM -0700 MST 2006"),
 			match,
-			channel.Name,
+			oldPostChannel.Name,
 		)
 
 		messageLines := strings.Split(oldPost.Message, "\n")
 		for _, line := range messageLines {
 			quote = fmt.Sprintf("%s\n> %s\n", quote, line)
 		}
+
 		post.Message = strings.Replace(post.Message, match, quote, 1)
 	}
 
