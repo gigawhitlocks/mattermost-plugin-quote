@@ -64,9 +64,9 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 		}
 
 		postedAt := time.Unix(oldPost.CreateAt/1000, 0)
-		quote := fmt.Sprintf("[**%s** at **%s**](%s) in ~%s said:\n",
+		quote := fmt.Sprintf("##### @%s at [%s](%s) in ~%s said:\n",
 			postUser.Username,
-			postedAt.Format("Mon Jan 2 15:04:05 -0700 MST 2006"),
+			postedAt.Format("Mon Jan 2 08:04PM -0700 MST 2006"),
 			match,
 			channel.DisplayName,
 		)
