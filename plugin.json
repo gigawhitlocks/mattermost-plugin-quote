@@ -2,7 +2,7 @@
     "id": "business.silly.quote",
     "name": "Permalink Quote Expander",
     "description": "This plugin turns links to scrollback into pretty quotes",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "min_server_version": "5.18.0",
     "server": {
 	"executables": {

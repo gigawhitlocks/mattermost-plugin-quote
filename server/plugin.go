@@ -29,6 +29,11 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 	if apiErr != nil {
 		return post, apiErr.Message
 	}
+
+	if channel.Type != model.CHANNEL_OPEN {
+		return post, ""
+	}
+
 	team, apiErr := p.API.GetTeam(channel.TeamId)
 	if apiErr != nil {
 		return post, apiErr.Message
