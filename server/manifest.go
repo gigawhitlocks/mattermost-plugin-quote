@@ -15,7 +15,7 @@ const manifestStr = `
   "id": "business.silly.quote",
   "name": "Permalink Quote Expander",
   "description": "This plugin turns links to scrollback into pretty quotes",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "min_server_version": "5.18.0",
   "server": {
     "executables": {
