@@ -92,7 +92,7 @@ func (p *Plugin) MessageWillBePosted(c *plugin.Context, post *model.Post) (*mode
 
 		messageLines := strings.Split(oldPost.Message, "\n")
 		for _, line := range messageLines {
-			quote = fmt.Sprintf("%s\n> %s\n", quote, line)
+			quote = fmt.Sprintf("\n%s\n> %s\n\n", quote, line)
 		}
 
 		post.Message = strings.Replace(post.Message, match, quote, 1)
